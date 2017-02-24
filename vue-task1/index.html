@@ -9,6 +9,7 @@
 </head>
 
 <body>
+    <p>请打开控制台查看</p>
     <script type="text/javascript">
         function Observer(options) {
             this.data = Object.create(null)
@@ -26,7 +27,8 @@
                         console.log(`你访问了 ${key}`)
                         return obj[key]
                     },
-                    set: function proxyGetter(val) {
+                    set: function proxySetter(val) {
+                        if (obj[key] === val) return
                         console.log(`你设置了 ${key}，新的值为 ${val}`)
                         obj[key] = val
                     }
