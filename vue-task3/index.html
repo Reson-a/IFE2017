@@ -68,9 +68,7 @@
         // 递归生成Observer
         function observe(value) {
             if (!value || typeof value !== 'object') {
-                return {
-                    dep: new Dep()
-                }
+                return
             }
             //生成新的observer
             return new Observer(value)
@@ -101,7 +99,7 @@
             this.value = this.get()
             this.isDeep = options.isDeep
 
-            // 遍历添加wather到dep中
+            // 遍历添加watcher到dep中
             if (this.isDeep) {
                 Dep.target = this
                 traverse(this.value)
