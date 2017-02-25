@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>IFE2017 动态数据绑定-task3</title>
+
+</head>
+
+<body>
+    <p>请打开控制台查看</p>
+    <script type="text/javascript">
+        function Observer(options) {
+            this.$data = options
+            this._walk(this.$data)
+
+            // 代理到data
+            this.data = Object.create(null)
+            proxy(this.$data, this.data)
+        }
+
+        // 遍历所有属性
+        Observer.prototype._walk = function(obj) {
+            let keys = Object.keys(obj)
+            keys.forEach(key => defineReactive(obj, key, this))
+        }
+
+        // 观察变化执行回调
+        Observer.prototype.$watch = function(key, cb, isDeep) {
+            return new Watcher({
+                vm: this,
+                key,
+                cb,
+                isDeep
+            })
+        }
+
+        // 转化为响应式属性
+        function defineReactive(obj, key, ob) {
+            let val = obj[key]
+            let childObj = observe(val)
+            let dep = new Dep()
+
+            Object.defineProperty(obj, key, {
+                configurable: true,
+                enumrable: true,
+                get: () => {
+                    // 如果是watcher触发的get,注册到dep中
+                    if (Dep.target) {
+                        dep.addSub(Dep.target)
+                    } else {
+                        console.log(`你访问了 ${key}`)
+                    }
+                    return val
+                },
+                set: newVal => {
+                    if (val === newVal) return
+                    val = newVal
+                    childObj = observe(newVal)
+
+                    // 广播到dep
+                    dep.notify()
+                }
+            })
+        }
+
+        // 递归生成Observer
+        function observe(value) {
+            if (!value || typeof value !== 'object') {
+                return {
+                    dep: new Dep()
+                }
+            }
+            //生成新的observer
+            return new Observer(value)
+        }
+
+        // 消息订阅器
+        function Dep() {
+            this.subs = []
+        }
+
+        // 添加订阅者
+        Dep.prototype.addSub = function(sub) {
+            if (this.subs.indexOf(sub) < 0) {
+                this.subs.push(sub)
+            }
+        }
+
+        // 通知订阅者
+        Dep.prototype.notify = function() {
+            this.subs.forEach(sub => sub.update())
+        }
+
+        // 消息订阅者
+        function Watcher(options) {
+            this.cb = options.cb
+            this.vm = options.vm
+            this.key = options.key
+            this.value = this.get()
+            this.isDeep = options.isDeep
+
+            // 遍历添加wather到dep中
+            if (this.isDeep) {
+                Dep.target = this
+                traverse(this.value)
+                Dep.target = null
+            }
+
+            function traverse(obj) {
+                let keys = Object.keys(obj)
+                keys.forEach(key => {
+                    if (typeof obj[key] === 'object') {
+                        traverse(obj[key])
+                    }
+                })
+
+            }
+        }
+
+        // 刷新操作
+        Watcher.prototype.update = function() {
+            this.run()
+        }
+
+        // 
+        Watcher.prototype.run = function() {
+            let value = this.get()
+            if (value !== this.value || this.isDeep) {
+                this.value = value
+                this.cb.call(this.vm, value)
+            }
+        }
+
+        // 触发数据层get
+        Watcher.prototype.get = function() {
+            Dep.target = this
+            let value = this.vm['data'][this.key]
+            Dep.target = null
+            return value
+        }
+
+
+        // 添加属性代理
+        function proxy(obj, proxy) {
+            let keys = Object.keys(obj)
+            keys.forEach(key => {
+                Object.defineProperty(proxy, key, {
+                    configurable: true,
+                    enumrable: true,
+                    get: function proxyGetter() {
+                        return obj[key]
+                    },
+                    set: function proxySetter(val) {
+                        obj[key] = val
+                    }
+                })
+            })
+        }
+
+
+        let app2 = new Observer({
+            name: {
+                firstName: 'shaofeng',
+                lastName: 'liang'
+            },
+            age: 25
+        });
+
+        var w2 = app2.$watch('name', function(newName) {
+            console.log('我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。')
+        }, true);
+
+        app2.data.name.firstName = 'hahaha';
+        // 输出：我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。
+        app2.data.name.lastName = 'blablabla';
+        // 输出：我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。
+
+
+
+        let app3 = new Observer({
+            a: {
+                c: {
+                    e: 1,
+                    f: 2
+                },
+                d: 2
+            },
+            b: 25
+        });
+
+        app3.$watch('a', function(newName) {
+            console.log('a发生了变化，可能是c、d、e、f变了')
+        }, true);
+
+        app3.data.a.c.e = 3;
+        app3.data.a.c.f = 4;
+        app3.data.a.c = 5;
+        app3.data.a.d = 6;
+    </script>
+</body>
+
+</html>
