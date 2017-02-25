@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>IFE2017 动态数据绑定-task2</title>
+
+</head>
+
+<body>
+    <p>请打开控制台查看</p>
+    <script type="text/javascript">
+        function Observer(options) {
+            this.$data = options
+            this.walk(this.$data)
+
+            this.data = Object.create(null)
+            proxy(this.$data, this.data)
+        }
+
+        // 遍历所有属性
+        Observer.prototype.walk = function(obj) {
+            let keys = Object.keys(obj)
+            keys.forEach(key => defineReactive(obj, key))
+        }
+
+        // 观察变化执行回调
+        Observer.prototype.$watch = function(key, cb) {
+            return new Watcher(this, key, cb)
+        }
+
+        // 转化为响应式属性
+        function defineReactive(obj, key) {
+            let val = obj[key]
+            let childObj = observe(val)
+            let dep = new Dep()
+
+            Object.defineProperty(obj, key, {
+                configurable: true,
+                enumrable: true,
+                get: () => {
+                    // 如果是watcher触发的get,注册到dep中
+                    if (Dep.target) {
+                        dep.addSub(Dep.target)
+                    }
+                    console.log(`你访问了 ${key}`)
+                    return val
+                },
+                set: newVal => {
+                    if (val === newVal) return
+                    console.log(`你设置了 ${key}，新的值为 ${newVal}`)
+                    val = newVal
+                    childObj = observe(newVal)
+
+                    // 广播到dep
+                    dep.notify()
+                }
+            })
+        }
+
+        // 递归生成Observer
+        function observe(value) {
+            if (!value || typeof value != 'object') return
+                //生成新的observer
+            return new Observer(value)
+        }
+
+        // 消息订阅器
+        function Dep() {
+            this.subs = []
+        }
+
+        // 添加订阅者
+        Dep.prototype.addSub = function(sub) {
+            if (this.subs.indexOf(sub) < 0) {
+                this.subs.push(sub)
+            }
+        }
+
+        // 通知订阅者
+        Dep.prototype.notify = function() {
+            this.subs.forEach(sub => sub.update())
+        }
+
+        // 消息订阅者
+        function Watcher(vm, key, cb) {
+            this.cb = cb
+            this.vm = vm
+            this.key = key
+            this.value = this.get()
+        }
+
+        // 刷新操作
+        Watcher.prototype.update = function() {
+            this.run()
+        }
+
+        // 
+        Watcher.prototype.run = function() {
+            let value = this.get()
+            if (value !== this.value) {
+                this.value = value
+                this.cb.call(this.vm, value)
+            }
+        }
+
+        // 触发数据层get
+        Watcher.prototype.get = function() {
+            Dep.target = this
+            let value = this.vm['data'][this.key]
+            Dep.target = null
+            return value
+        }
+
+
+
+        // 添加属性代理
+        function proxy(obj, proxy) {
+            let keys = Object.keys(obj)
+            keys.forEach(key => {
+                Object.defineProperty(proxy, key, {
+                    configurable: true,
+                    enumrable: true,
+                    get: function proxyGetter() {
+                        return obj[key]
+                    },
+                    set: function proxySetter(val) {
+                        obj[key] = val
+                    }
+                })
+            })
+        }
+
+
+        let app1 = new Observer({
+            name: 'youngwind',
+            age: 25
+        });
+
+        app1.data.name = {
+            lastName: 'liang',
+            firstName: 'shaofeng'
+        };
+
+        app1.data.name.lastName;
+        // 这里还需要输出 '你访问了 lastName '
+        app1.data.name.firstName = 'lalala';
+        // 这里还需要输出 '你设置了firstName, 新的值为 lalala'
+
+        let app2 = new Observer({
+            name: 'youngwind',
+            age: 25
+        });
+
+        // 你需要实现 $watch 这个 API
+        app2.$watch('age', function(age) {
+            console.log(`我的年纪变了，现在已经是：${age}岁了`)
+        });
+
+        app2.data.age = 100; // 输出：'我的年纪变了，现在已经是100岁了'
+    </script>
+</body>
+
+</html>
