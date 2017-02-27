@@ -61,7 +61,7 @@
                 })
             }
             complieNode(node) {
-                this.vm.parser.parseVText(node)
+                this.vm.parser.parseMustache(node)
             }
         }
 
@@ -70,7 +70,7 @@
             constructor(vm) {
                 this.vm = vm
             }
-            parseVText(node) {
+            parseMustache(node) {
                 let val = node.nodeValue
                 let exps = val.match(/{{[^}]+}}/g)
                 if (!exps) return
@@ -84,7 +84,7 @@
                     let res = new Function('exp', code).call(vm, exp)
                     val = val.replace(exp, res)
                 })
-                vm.updater.updateNodeTextContent(node, val)
+                vm.updater.updateNodeValue(node, val)
             }
 
         }
@@ -94,7 +94,7 @@
             constructor(vm) {
                 this.vm = vm
             }
-            updateNodeTextContent(node, val) {
+            updateNodeValue(node, val) {
                 node.nodeValue = val
             }
         }
