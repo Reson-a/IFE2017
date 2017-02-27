@@ -99,13 +99,6 @@
             this.value = this.get()
             this.isDeep = options.isDeep
 
-            // 遍历添加watcher到dep中
-            if (this.isDeep) {
-                Dep.target = this
-                traverse(this.value)
-                Dep.target = null
-            }
-
             function traverse(obj) {
                 let keys = Object.keys(obj)
                 keys.forEach(key => {
@@ -113,7 +106,6 @@
                         traverse(obj[key])
                     }
                 })
-
             }
         }
 
@@ -135,6 +127,11 @@
         Watcher.prototype.get = function() {
             Dep.target = this
             let value = this.vm['data'][this.key]
+
+            // 如果是深度观察 遍历添加watcher到dep中
+            if (this.isDeep) {
+                traverse(value)
+            }
             Dep.target = null
             return value
         }

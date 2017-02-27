@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>IFE2017 动态数据绑定-task5</title>
+
+</head>
+
+<body>
+    <!-- 页面中原本的 html 模板片段 -->
+    <div id="app">
+        <p>姓名：{{user.name}}</p>
+        <p>年龄：{{user.age}}</p>
+    </div>
+    <script type="text/javascript">
+        class Vue {
+            constructor(options) {
+                this.$data = options.data
+                this.observer = new Observer(this.$data)
+                this._proxy(this.$data, this)
+
+
+                this.$el = document.querySelector(options.el)
+
+                this.complier = new Complier(this)
+                this.parser = new Parser(this)
+                this.updater = new Updater(this)
+
+
+                if (this.$el) {
+                    this.$mount()
+                }
+            }
+
+            // 挂载到模板
+            $mount() {
+                let fragment = document.createDocumentFragment()
+                    // 添加到fragment中
+                if (this.$el) {
+                    [...this.$el.childNodes].forEach(node => fragment.appendChild(node))
+                }
+                this.complier.complieElement(fragment)
+                this.$el.appendChild(fragment)
+            }
+
+            $watch(key, cb, isDeep) {
+                return new Watcher({
+                    vm: this,
+                    key,
+                    cb,
+                    isDeep
+                })
+            }
+
+            // 添加属性代理
+            _proxy(obj, proxy) {
+                let keys = Object.keys(obj)
+                keys.forEach(key => {
+                    Object.defineProperty(proxy, key, {
+                        configurable: true,
+                        enumrable: true,
+                        get: function proxyGetter() {
+                            return obj[key]
+                        },
+                        set: function proxySetter(val) {
+                            obj[key] = val
+                        }
+                    })
+                })
+            }
+
+        }
+
+        // 观察者
+        class Observer {
+            constructor(obj) {
+                this._walk(obj)
+            }
+            _walk(obj) {
+                let keys = Object.keys(obj)
+                keys.forEach(key => defineReactive(obj, key))
+            }
+        }
+
+        // 转化为响应式属性
+        function defineReactive(obj, key) {
+            let val = obj[key]
+            let childObj = observe(val)
+            let dep = new Dep()
+
+            Object.defineProperty(obj, key, {
+                configurable: true,
+                enumrable: true,
+                get: () => {
+                    // 如果是watcher触发的get,注册到dep中
+                    if (Dep.target) {
+                        dep.addSub(Dep.target)
+                    }
+                    return val
+                },
+                set: newVal => {
+                    if (val === newVal) return
+                    val = newVal
+                    childObj = observe(newVal)
+
+                    // 广播到dep
+                    dep.notify()
+                }
+            })
+        }
+
+        // 递归生成Observer
+        function observe(value) {
+            if (!value || typeof value !== 'object') {
+                return
+            }
+            //生成新的observer
+            return new Observer(value)
+        }
+
+
+        // 消息订阅器
+        class Dep {
+            constructor() {
+                this.subs = []
+            }
+            addSub(sub) {
+                if (this.subs.indexOf(sub) < 0) {
+                    this.subs.push(sub)
+                }
+            }
+            notify() {
+                this.subs.forEach(sub => sub.update())
+            }
+        }
+
+        // Watcher用于记录依赖
+        class Watcher {
+            constructor(options) {
+                this.cb = options.cb
+                this.vm = options.vm
+                this.key = options.key
+                this.value = this.get()
+                this.isDeep = options.isDeep
+            }
+            update() {
+                this.run()
+            }
+            run() {
+                let value = this.get()
+                if (value !== this.value || this.isDeep) {
+                    this.value = value
+                    this.cb.call(this.vm, value)
+                }
+            }
+            get() {
+                Dep.target = this
+                let value = this.vm[this.key]
+
+                // 如果是深度观察 遍历添加watcher到dep中
+                if (this.isDeep) {
+                    traverse(value)
+                }
+                Dep.target = null
+                return value
+            }
+        }
+
+        // 遍历访问所有属性
+        function traverse(obj) {
+            let keys = Object.keys(obj)
+            keys.forEach(key => {
+                if (typeof obj[key] === 'object') {
+                    traverse(obj[key])
+                }
+            })
+        }
+
+
+        // 模板编译
+        class Complier {
+            constructor(vm) {
+                this.vm = vm
+            }
+            complieElement(node) {
+                [...node.childNodes].forEach((node, index) => {
+                    if (node.childNodes.length) {
+                        this.complieElement(node)
+                    } else {
+                        this.complieNode(node)
+                    }
+                })
+            }
+            complieNode(node) {
+                this.vm.parser.parseMustache(node)
+            }
+        }
+
+
+        // 指令解析
+        class Parser {
+            constructor(vm) {
+                this.vm = vm
+            }
+            parseMustache(node) {
+                let exps = node.nodeValue.match(/{{[^}]+}}/g)
+                if (!exps) return
+
+                let vm = this.vm
+                new nodeWatcher(node, exps, vm, vm.updater.updateNodeValue)
+            }
+        }
+
+        // 在dom节点监测数据变化
+        class nodeWatcher {
+            constructor(node, exps, vm, cb) {
+                this.node = node
+                this.template = node.nodeValue
+
+                // 指令表达式数组
+                this.exps = exps
+
+                // 如果是mustache语法，单独维护一个去掉双大括号的表达式
+                this.puerExps = exps.map(exp => exp.replace(/{}/, ''))
+
+                this.vm = vm
+                this.cb = cb
+                this.update()
+            }
+            update() {
+                let newVal = this.template
+
+                Dep.target = this
+
+                // 更新val值，期间访问的属性会被记录为依赖
+                this.exps.forEach((exp, index) => {
+                    let code = `with(this){return eval(exp)}`
+                    let res = new Function('exp', code).call(this.vm, this.puerExps[index])
+                    newVal = newVal.replace(exp, res)
+                })
+                Dep.target = null
+
+                // 调用回调，更新dom
+                this.cb.call(this.vm, this.node, newVal)
+                console.log(this.node.parentNode)
+                console.log('上面的dom节点内容更新了')
+            }
+        }
+
+        // 指令刷新
+        class Updater {
+            constructor(vm) {
+                this.vm = vm
+            }
+            updateNodeValue(node, val) {
+                node.nodeValue = val
+            }
+        }
+
+
+        let app = new Vue({
+            el: '#app',
+            data: {
+                user: {
+                    name: 'youngwind',
+                    age: 25
+                },
+                school: 'bupt',
+                major: 'computer'
+            }
+        })
+
+        console.log('给data.school赋新值,dom不会更新')
+        app.school = 'bnu'
+
+        console.log('给data.major赋新值,dom不会更新')
+        app.major = 'psychology'
+
+        console.log('给data.user.age赋新值,dom的某个节点会更新')
+        app.user.age = 26
+    </script>
+</body>
+
+</html>
