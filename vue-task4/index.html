@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>IFE2017 动态数据绑定-task4</title>
+
+</head>
+
+<body>
+    <!-- 页面中原本的 html 模板片段 -->
+    <div id="app">
+        <p>姓名：{{user.name}}</p>
+        <p>年龄：{{user.age}}</p>
+        <p>姓名+年龄：{{user.name}} {{user.age}}岁</p>
+        <p>另一个人的姓名 {{user1.name.firstName}} {{user1.name.lastName}}</p>
+    </div>
+    <script type="text/javascript">
+        class Vue {
+            constructor(options) {
+                this.data = options.data
+                this.$el = document.querySelector(options.el)
+
+                this.complier = new Complier(this)
+                this.parser = new Parser(this)
+                this.updater = new Updater(this)
+
+
+                if (this.$el) {
+                    this.$mount()
+                }
+            }
+
+            // 挂载到模板
+            $mount() {
+                let fragment = document.createDocumentFragment()
+                    // 添加到fragment中
+                if (this.$el) {
+                    [...this.$el.childNodes].forEach(node => fragment.appendChild(node))
+                }
+                this.complier.complieElement(fragment)
+                this.$el.appendChild(fragment)
+            }
+        }
+
+
+
+        // 模板编译
+        class Complier {
+            constructor(vm) {
+                this.vm = vm
+            }
+            complieElement(node) {
+                [...node.childNodes].forEach((node, index) => {
+                    if (node.childNodes.length) {
+                        this.complieElement(node)
+                    } else {
+                        this.complieNode(node)
+                    }
+                })
+            }
+            complieNode(node) {
+                this.vm.parser.parseVText(node)
+            }
+        }
+
+        // 指令解析
+        class Parser {
+            constructor(vm) {
+                this.vm = vm
+            }
+            parseVText(node) {
+                let val = node.nodeValue
+                let exps = val.match(/{{[^}]+}}/g)
+                if (!exps) return
+                let vm = this.vm
+
+                // 感谢孙兆庆同学的笔记，这块一开始卡住了
+                exps.forEach(exp => {
+                    let code = `with(this.data) {
+                            return eval(exp.replace(/[{}]/g,''))
+                        }`
+                    let res = new Function('exp', code).call(vm, exp)
+                    val = val.replace(exp, res)
+                })
+                vm.updater.updateNodeTextContent(node, val)
+            }
+
+        }
+
+        // 指令刷新
+        class Updater {
+            constructor(vm) {
+                this.vm = vm
+            }
+            updateNodeTextContent(node, val) {
+                node.nodeValue = val
+            }
+        }
+
+
+        let app = new Vue({
+            el: '#app',
+            data: {
+                user: {
+                    name: 'youngwind',
+                    age: 25
+                },
+                user1: {
+                    name: {
+                        firstName: 'Harry',
+                        lastName: 'Potter'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
