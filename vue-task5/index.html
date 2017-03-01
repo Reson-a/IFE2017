@@ -21,14 +21,11 @@
                 this.observer = new Observer(this.$data)
                 this._proxy(this.$data, this)
 
-
-                this.$el = document.querySelector(options.el)
-
                 this.complier = new Complier(this)
                 this.parser = new Parser(this)
                 this.updater = new Updater(this)
 
-
+                this.$el = document.querySelector(options.el)
                 if (this.$el) {
                     this.$mount()
                 }
@@ -222,7 +219,7 @@
                 // 指令表达式数组
                 this.exps = exps
 
-                // 如果是mustache语法，单独维护一个去掉双大括号的表达式
+                // 如果是mustache语法，单独维护一个去掉双大括号的表达式数组
                 this.puerExps = exps.map(exp => exp.replace(/{}/, ''))
 
                 this.vm = vm

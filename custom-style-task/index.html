@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>IFE2017 自定义checkbox radio样式</title>
+    <style type="text/css">
+        label {
+            cursor: pointer;
+        }
+        
+        .custom-checkbox {
+            background: url(img/sprite.png) -24px -20px no-repeat;
+        }
+        
+        .custom-checkbox[checked] {
+            background: url(img/sprite.png) -24px -20px no-repeat;
+        }
+        
+        .custom-radio {
+            background: url(img/sprite.png) -24px -20px no-repeat;
+        }
+        
+        .custom-radio[checked] {
+            background: url(img/sprite.png) -24px -20px no-repeat;
+        }
+        
+        input {
+            margin: 0;
+            visibility: hidden;
+        }
+        
+        .custom-radio input {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .custom-checkbox input {
+            width: 14px;
+            height: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <label class="custom-checkbox"><input type="checkbox" name="" value="汪汪" checked></label>
+    <label class="custom-checkbox"><input type="checkbox" name="" value="喵喵"></label>
+    <p></p>
+    <label class="custom-radio"><input type="radio" name="" value="汪汪" checked></label>
+    <label class="custom-radio"><input type="radio" name="" value="喵喵"></label>
+
+
+</body>
+
+</html>
