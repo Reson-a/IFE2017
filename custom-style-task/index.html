@@ -5,51 +5,52 @@
     <meta charset="utf-8">
     <title>IFE2017 自定义checkbox radio样式</title>
     <style type="text/css">
-        label {
-            cursor: pointer;
-        }
-        
-        .custom-checkbox {
-            background: url(img/sprite.png) -24px -20px no-repeat;
-        }
-        
-        .custom-checkbox[checked] {
-            background: url(img/sprite.png) -24px -20px no-repeat;
-        }
-        
-        .custom-radio {
-            background: url(img/sprite.png) -24px -20px no-repeat;
-        }
-        
-        .custom-radio[checked] {
-            background: url(img/sprite.png) -24px -20px no-repeat;
-        }
-        
         input {
-            margin: 0;
+            width: 16px;
+            height: 16px;
+            margin: 0 10px;
             visibility: hidden;
         }
         
-        .custom-radio input {
+        input::after {
+            content: '';
+            position: absolute;
             width: 16px;
             height: 16px;
+            visibility: visible;
+            cursor: pointer;
         }
         
-        .custom-checkbox input {
-            width: 14px;
-            height: 14px;
+        input[type="checkbox"]::after {
+            background: url(img/sprite.png) -25px -33px no-repeat;
+        }
+        
+        input[type="radio"]::after {
+            background: url(img/sprite.png) -24px -10px no-repeat;
+        }
+        
+        input[type="checkbox"]:checked::after {
+            background: url(img/sprite.png) -60px -32px no-repeat;
+        }
+        
+        input[type="radio"]:checked::after {
+            background: url(img/sprite.png) -59px -10px no-repeat;
         }
     </style>
 </head>
 
 <body>
-    <label class="custom-checkbox"><input type="checkbox" name="" value="汪汪" checked></label>
-    <label class="custom-checkbox"><input type="checkbox" name="" value="喵喵"></label>
-    <p></p>
-    <label class="custom-radio"><input type="radio" name="" value="汪汪" checked></label>
-    <label class="custom-radio"><input type="radio" name="" value="喵喵"></label>
-
-
+    <fieldset>
+        <legend>自定义checkbox</legend>
+        <label class="custom-checkbox"><input type="checkbox" name="" value="汪汪" checked>汪汪</label>
+        <label class="custom-checkbox"><input type="checkbox" name="" value="喵喵">喵喵</label>
+    </fieldset>
+    <fieldset>
+        <legend>自定义radio</legend>
+        <label class="custom-radio"><input type="radio" name="sound" value="汪汪" checked>汪汪</label>
+        <label class="custom-radio"><input type="radio" name="sound" value="喵喵">喵喵</label>
+    </fieldset>
+    <p>tips：父元素visibility:hidden,子元素visibility:visible仍会显示</p>
 </body>
 
 </html>
