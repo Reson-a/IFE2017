@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>IFE2017 自定义右键菜单</title>
+    <style type="text/css">
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+        
+        #area {
+            background-color: #eee;
+            border: 2px solid #ccc;
+            padding: 1em;
+        }
+        
+        ul {
+            background-color: #fff;
+            border: 2px solid #ccc;
+            padding: 10px 20px;
+            list-style: none;
+            width: 250px;
+            box-sizing: border-box;
+        }
+        
+        li {
+            height: 40px;
+            line-height: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <p id="area">right click to see the menu</p>
+    <script>
+        const area = document.getElementById('area')
+        var menu
+        const menuItems = [{
+            title: 'Menu Item 1',
+            callback(e) {
+                console.log('This is Menu Item 1')
+            }
+        }, {
+            title: 'Menu Item 2',
+            callback(e) {
+                console.log('This is Menu Item 2')
+            }
+        }, {
+            title: 'Menu Item 3',
+            callback(e) {
+                console.log('This is Menu Item 3')
+            }
+        }]
+
+        area.addEventListener('contextmenu', handleRightClick)
+        document.body.addEventListener('click', cancelMenu)
+        document.body.addEventListener('contextmenu', cancelMenu)
+
+
+        // 右键弹出菜单
+        function handleRightClick(e) {
+            e.stopPropagation()
+            e.preventDefault()
+            menu = new Menu({
+                menuItems,
+                position: {
+                    x: e.clientX,
+                    y: e.clientY
+                }
+            })
+            console.log(menu)
+        }
+        // 取消弹出菜单
+        function cancelMenu() {
+            menu.hide()
+        }
+
+
+        class Menu {
+            constructor(options) {
+                this.menuItems = options.menuItems
+                this.position = options.position
+                this.width = 250
+                this.heght = 100
+
+                if (!Menu.menu) {
+                    Menu.menu = this.init()
+                    this.initPos()
+                    document.body.appendChild(Menu.menu)
+                } else {
+                    this.initPos()
+                    this.show()
+                }
+            }
+            init() {
+                let menu = document.createElement('ul')
+                menu.id = 'menu'
+                this.menuItems.forEach(item => {
+                    let menuItem = document.createElement('li')
+                    menuItem.textContent = item.title
+                    menuItem.addEventListener('click', (e) => {
+                        e.stopPropagation()
+                        item.callback(e)
+                    })
+                    this.menuItems.push(menuItem)
+                    menu.appendChild(menuItem)
+                })
+                menu.addEventListener('contextmenu', (e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                })
+                return menu
+            }
+            initPos() {
+                let style = Menu.menu.style
+                let x = this.position.x
+                let y = this.position.y
+                style.position = 'fixed'
+                if (x + this) {}
+
+                style.left = x + 'px'
+                style.top = y + 'px'
+            }
+            hide() {
+                let menu = Menu.menu
+                if (!menu) return
+                menu.style.display = 'none'
+            }
+            show() {
+                let menu = Menu.menu
+                if (!menu) return
+                menu.style.display = 'block'
+            }
+        }
+    </script>
+</body>
+
+</html>
