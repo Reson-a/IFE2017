@@ -20,37 +20,78 @@
             visibility: visible;
             cursor: pointer;
         }
+        /*可以写成input[type="checkbox"]*/
         
-        input[type="checkbox"]::after {
+        .custom-checkbox1 input::after {
             background: url(img/sprite.png) -25px -33px no-repeat;
         }
         
-        input[type="radio"]::after {
+        .custom-radio1 input::after {
             background: url(img/sprite.png) -24px -10px no-repeat;
         }
         
-        input[type="checkbox"]:checked::after {
+        .custom-checkbox1 input:checked::after {
             background: url(img/sprite.png) -60px -32px no-repeat;
         }
         
-        input[type="radio"]:checked::after {
+        .custom-radio1 input:checked::after {
             background: url(img/sprite.png) -59px -10px no-repeat;
+        }
+        
+        .custom-checkbox2 input::after {
+            box-sizing: border-box;
+            line-height: 14px;
+            text-align: center;
+            border: 2px solid #D9D9D9;
+        }
+        
+        .custom-checkbox2 input:checked::after {
+            content: '\2714';
+            color: #D73D32;
+            border-color: #D73D32;
+        }
+        
+        .custom-radio2 input::after {
+            box-sizing: border-box;
+            line-height: 14px;
+            text-align: center;
+            border: 2px solid #D9D9D9;
+            border-radius: 50%;
+        }
+        
+        .custom-radio2 input:checked::after {
+            content: '\2022';
+            font-size: 20px;
+            color: #D73D32;
+            border-color: #D73D32;
         }
     </style>
 </head>
 
 <body>
     <fieldset>
-        <legend>自定义checkbox</legend>
-        <label class="custom-checkbox"><input type="checkbox" name="" value="汪汪" checked>汪汪</label>
-        <label class="custom-checkbox"><input type="checkbox" name="" value="喵喵">喵喵</label>
+        <legend>自定义checkbox（背景图）</legend>
+        <label class="custom-checkbox1"><input type="checkbox" name="" value="汪汪" checked>汪汪</label>
+        <label class="custom-checkbox1"><input type="checkbox" name="" value="喵喵">喵喵</label>
     </fieldset>
     <fieldset>
-        <legend>自定义radio</legend>
-        <label class="custom-radio"><input type="radio" name="sound" value="汪汪" checked>汪汪</label>
-        <label class="custom-radio"><input type="radio" name="sound" value="喵喵">喵喵</label>
+        <legend>自定义radio（背景图）</legend>
+        <label class="custom-radio1"><input type="radio" name="sound" value="汪汪" checked>汪汪</label>
+        <label class="custom-radio1"><input type="radio" name="sound" value="喵喵">喵喵</label>
+    </fieldset>
+    <fieldset>
+        <legend>自定义checkbox（伪元素）</legend>
+        <label class="custom-checkbox2"><input type="checkbox" name="" value="汪汪" checked>汪汪</label>
+        <label class="custom-checkbox2"><input type="checkbox" name="" value="喵喵">喵喵</label>
+    </fieldset>
+    <fieldset>
+        <legend>自定义radio（伪元素）</legend>
+        <label class="custom-radio2"><input type="radio" name="sound1" value="汪汪" checked>汪汪</label>
+        <label class="custom-radio2"><input type="radio" name="sound1" value="喵喵">喵喵</label>
     </fieldset>
     <p>tips：父元素visibility:hidden,子元素visibility:visible仍会显示</p>
+    <p>背景图可以更方便地实现一些自定义效果。但需要引入图片</p>
+    <p>伪元素content实现在放大情况下不会变得不清晰</p>
 </body>
 
 </html>
