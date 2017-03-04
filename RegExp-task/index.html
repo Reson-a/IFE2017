@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>IFE2017 正则表达式</title>
+    <style type="text/css">
+
+    </style>
+</head>
+
+<body>
+    <input id="phone" type="text" name="" value="" placeholder="请输入电话号码">
+    <p id="phone-msg"></p>
+    <input id="word" type="text" name="" value="" placeholder="请输入相邻重复单词">
+    <p id="word-msg"></p>
+
+    <script>
+        const phoneReg = /^1[34578]\d{9}$/
+        const wordReg = /(\b\w+)\s+\1\b/
+        const phoneIpt = document.getElementById('phone')
+        const wordIpt = document.getElementById('word')
+        const phoneMsg = document.getElementById('phone-msg')
+        const wordMsg = document.getElementById('word-msg')
+
+        phoneIpt.addEventListener('blur', function() {
+            if (validate(phoneReg, this.value)) {
+                phoneMsg.textContent = '您输入的是合法的电话号码'
+            } else {
+                phoneMsg.textContent = '您输入的不是合法的电话号码'
+            }
+        })
+
+        wordIpt.addEventListener('blur', function() {
+            if (validate(wordReg, this.value)) {
+                wordMsg.textContent = '您输入的字符串含有相邻重复单词'
+            } else {
+                wordMsg.textContent = '您输入的字符串不含有相邻重复单词'
+            }
+        })
+
+        function validate(reg, value) {
+            if (!reg.test) return
+            return reg.test(value)
+        }
+    </script>
+</body>
+
+</html>
