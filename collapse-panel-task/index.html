@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>IFE2017 CSS折叠面板</title>
+    <style type="text/css">
+        input {
+            display: none;
+        }
+        
+        label {
+            display: block;
+            width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        
+        input:checked+label h4 {
+            border-bottom: 1px solid #ccc;
+        }
+        
+        input:checked+label p {
+            max-height: 3000px;
+        }
+        
+        h4 {
+            margin: 0;
+            padding: 0 10px;
+            line-height: 50px;
+            background-color: #eee;
+        }
+        
+        p {
+            margin: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 2s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <input id="panel1" type="radio" name="panel" value="" checked>
+    <label for="panel1">
+        <h4>Collapsible Group Item #1</h4>
+        <p>随便写点我是面板一的内容随便写点我是面板一的内容随便写点我是面板一的内容随便写点我是面板一的内容随便写点我是面板一的内容</p>
+    </label>
+    <input id="panel2" type="radio" name="panel" value="">
+    <label for="panel2">
+        <h4>Collapsible Group Item #2</h4>
+        <p>随便写点我是面板二的内容随便写点我是面板二的内容随便写点我是面板二的内容随便写点我是面板二的内容随便写点我是面板二的内容</p>
+    </label>
+    <input id="panel3" type="radio" name="panel" value="">
+    <label for="panel3">
+        <h4>Collapsible Group Item #3</h4>
+        <p>随便写点我是面板三的内容随便写点我是面板三的内容随便写点我是面板三的内容随便写点我是面板三的内容随便写点我是面板三的内容</p>
+    </label>
+</body>
+
+</html>
