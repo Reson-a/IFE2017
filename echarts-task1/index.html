@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>IFE2017 echarts</title>
+    <style type="text/css">
+
+    </style>
+</head>
+
+<body>
+    <div id="main" style="width:600px;height:400px;"></div>
+    <script src="//cdn.bootcss.com/echarts/3.4.0/echarts.common.min.js">
+    </script>
+    <script>
+        const myChart = echarts.init(document.getElementById('main'))
+        const option = {
+            title: {
+                text: '本学期高一1班平均成绩'
+            },
+            tooltip: {},
+            legend: {
+                data: [{
+                    name: '成绩',
+                    icon: 'circle'
+                }]
+            },
+            xAxis: {
+                data: ["月考1", "月考2", "期中", "月考3", "月考4", "期末"]
+            },
+            yAxis: {},
+            series: [{
+                name: '得分',
+                type: 'bar',
+                data: [95, 90, 86, 80, 70, 59],
+                barWidth: '40%',
+                itemStyle: {
+                    normal: {
+                        color: '#58B7FF'
+                    }
+                }
+
+            }, {
+                name: '得分',
+                type: 'line',
+                data: [95, 90, 86, 80, 70, 59],
+                symbol: 'diamond',
+                symbolSize: '10',
+                itemStyle: {
+                    normal: {
+                        color: '#FF4949'
+                    }
+                }
+            }]
+        }
+
+        myChart.setOption(option)
+    </script>
+
+</body>
+
+</html>
